@@ -9,13 +9,14 @@ board = [list(map(int,input().split())) for _ in range(L)]
 area = [[0 for _ in range(L)] for _ in range(L)]
 kloc, ksize, khp = [None for _ in range(N+1)],[None for _ in range(N+1)],[None for _ in range(N+1)]
 khp_full = [None for _ in range(N+1)] # 나중에 비교용
+moved = [False for _ in range(N+1)]
 
 def fill(num, r,c,h,w):
     for i in range(r,r+h):
         for j in range(c,c+w):
             area[i][j] = num
 
-def move(k_num, d, no_dmg=False):
+def move(k_num, d):
     dy, dx = dydx[d]
     next_edge = get_next_edge(k_num,d)
     for ny,nx in next_edge:
@@ -40,17 +41,27 @@ def move(k_num, d, no_dmg=False):
         area[ny-h*dy][nx-w*dx] = 0
     
     # 데미지
-    if no_dmg:
-        return 1
-    for i in range(y+dy,y+dy+h):
-        for j in range(x+dx,x+dx+w):
-            khp[k_num] -= int(board[i][j]==TRAP)
-    if khp[k_num] <= 0:
-        for i in range(y+dy,y+dy+h):
-            for j in range(x+dx,x+dx+w):
-                area[i][j] = 0
+    moved[k_num] = True
     return 1
 
+def damage(k_num):
+    global L,N
+    for num in range(1,N+1):
+        if num == k_num or not moved[num]: 
+            continue
+        moved[num] = False
+        y,x = kloc[num]
+        h,w = ksize[num]
+        for i in range(y,y+h):
+            for j in range(x,x+w):
+                khp[num] -= int(board[i][j]==TRAP)
+                if khp[num] <=0:
+                    break
+        if khp[num] <= 0:
+            for i in range(y,y+h):
+                for j in range(x,x+w):
+                    area[i][j] = 0
+    return
 
 def get_next_edge(k_num,d): 
     sy,sx = kloc[k_num]
@@ -75,7 +86,8 @@ for i in range(1,N+1):
 
 for _ in range(Q):
     i,d = map(int,input().split()) # ^ > v <
-    move(i,d,True)
+    if(move(i,d)):
+        damage(i)
 
 
 
@@ -84,4 +96,6 @@ ans = 0
 for i in range(1,N+1):
     if khp[i]>0:
         ans += khp_full[i]-khp[i]
+        print(i,khp_full[i]-khp[i])
 print(ans)
+print(khp)
