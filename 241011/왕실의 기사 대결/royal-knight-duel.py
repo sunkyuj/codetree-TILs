@@ -96,6 +96,6 @@ ans = 0
 for i in range(1,N+1):
     if khp[i]>0:
         ans += khp_full[i]-khp[i]
-        print(i,khp_full[i]-khp[i])
+        # print(i,khp_full[i]-khp[i])
 print(ans)
-print(khp)
+# print(khp)
